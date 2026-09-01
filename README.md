@@ -192,10 +192,6 @@ RAZORPAY_KEY_ID=rzp_test_TVTQwEmmKs24uu
 RAZORPAY_KEY_SECRET=HX0VgZoyjyCQjHLykPnpeapV
 RAZORPAY_WEBHOOK_SECRET=rzp_whsec_agentic_test_secret
 
-# MongoDB & Auth Configuration
-MONGODB_URI=mongodb+srv://nirajborole0_db_user:D1Wq0l2cMxlgXdea@cluster0.mvnckzw.mongodb.net/shopstore?retryWrites=true&w=majority&appName=Cluster0
-JWT_SECRET=shopstore_jwt_super_secret_key_2026_agentic
-
 # Server Configuration
 PORT=4000
 NODE_ENV=development
