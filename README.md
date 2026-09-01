@@ -1,10 +1,13 @@
 # ⚡ ShopStore — Razorpay Agentic Commerce & Conversational Storefront
 
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-razorpay--agentic--commerce-46E3B7?style=for-the-badge&logo=render)](https://razorpay-agentic-commerce-p54m.onrender.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-v18%2B%20%7C%20v20%2B-green?logo=node.js)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-v5.7-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Razorpay](https://img.shields.io/badge/Razorpay-Track%2001%20Ready-0C2340?logo=razorpay)](https://razorpay.com/)
 [![MongoDB](https://img.shields.io/badge/Database-MongoDB%20Atlas%20%2B%20Fallback-47A248?logo=mongodb)](https://www.mongodb.com/)
 [![Tests](https://img.shields.io/badge/Tests-12%2F12%20Passing%20(100%25)-brightgreen)]()
+
+🌐 **Live Application URL:** **[https://razorpay-agentic-commerce-p54m.onrender.com/](https://razorpay-agentic-commerce-p54m.onrender.com/)**
 
 > **Track 01: AI Growth & Agentic Commerce**  
 > An autonomous, production-grade e-commerce engine combining **Conversational In-App Checkout** (Zero-redirect Razorpay payments), an **Agent-Readable Catalog Manifest (AP2 / ACP Protocols)**, **Real-Time Customer Spending & Market Charts**, and a **Strict Guardrail Policy Engine** with 100% explainable, bounded, and gated financial actions.
@@ -13,7 +16,7 @@
 
 ## 📖 Short Description (Project Overview)
 
-**ShopStore Agentic Commerce** is a full-stack platform engineered to grow merchant revenue by bridging traditional web storefronts with autonomous AI buyers and conversational shoppers. Customers can search live products, bargain for dynamic discounts with an AI assistant within strict safety bounds (maximum 15% discount cap & profit margin floor), and check out instantly using **Razorpay with zero external page redirects**. External autonomous buying agents (e.g., ChatGPT, Claude Shopping, NPCI UAP) can discover products and execute programmatic purchases end-to-end via standardized machine-to-machine protocols (`AP2/1.0` and `ACP/2.0`).
+**ShopStore Agentic Commerce** ([Live Demo](https://razorpay-agentic-commerce-p54m.onrender.com/)) is a full-stack platform engineered to grow merchant revenue by bridging traditional web storefronts with autonomous AI buyers and conversational shoppers. Customers can search live products, bargain for dynamic discounts with an AI assistant within strict safety bounds (maximum 15% discount cap & profit margin floor), and check out instantly using **Razorpay with zero external page redirects**. External autonomous buying agents (e.g., ChatGPT, Claude Shopping, NPCI UAP) can discover products and execute programmatic purchases end-to-end via standardized machine-to-machine protocols (`AP2/1.0` and `ACP/2.0`).
 
 ---
 
@@ -277,7 +280,10 @@ node -e "/* test suite */"
 
 ---
 
-## 🚀 Deployment Guide (Render & Railway)
+## 🚀 Live Deployment (Render & Railway)
+
+### 🌐 Live Production URL:
+- **Web Storefront & Agent APIs:** **[https://razorpay-agentic-commerce-p54m.onrender.com/](https://razorpay-agentic-commerce-p54m.onrender.com/)**
 
 ### 1-Click Deployment via Render:
 1. Push this repository to GitHub.
