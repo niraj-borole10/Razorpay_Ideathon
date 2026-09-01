@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopStore — Agentic Commerce</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter Tight, Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for Graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Razorpay Checkout.js -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            neutral: {
+              50: '#F9FAFB',
+              100: '#F3F4F6',
+              200: '#E5E7EB',
+              300: '#D1D5DB',
+              400: '#9CA3AF',
+              500: '#6B7280',
+              600: '#4B5563',
+              700: '#374151',
+              800: '#1F2937',
+              900: '#111827',
+              950: '#030712'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            heading: ['Inter Tight', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#F3F4F6] text-[#111827] font-sans min-h-screen antialiased">
+
+  <!-- ========================================================= -->
+  <!-- 1. AUTHENTICATION VIEW (Sign In / Register / Forgot Password) -->
+  <!-- ========================================================= -->
+  <div id="view-login" class="min-h-screen flex flex-col items-center justify-center py-12 px-4 bg-white">
+    
+    <!-- Logo -->
+    <div class="mb-6 flex items-center space-x-2.5">
+      <div class="w-8 h-8 rounded bg-[#111827] flex items-center justify-center text-white text-sm font-semibold font-heading shadow-sm">
+        S
+      </div>
+      <span class="font-heading font-semibold text-xl text-neutral-900 tracking-tight">ShopStore</span>
+    </div>
+
+    <!-- Alert / Toast Message Container -->
+    <div id="auth-alert" class="hidden w-full max-w-[380px] mb-4 p-3 rounded-lg border text-xs leading-relaxed transition-all"></div>
+
+    <!-- MAIN AUTH CONTAINER -->
+    <div class="w-full max-w-[380px] bg-white p-7 border border-neutral-200 rounded-lg shadow-sm">
+      
+      <!-- PANEL A: SIGN IN -->
+      <div id="panel-auth-login" class="space-y-5">
+        <div>
+          <h1 class="font-heading font-semibold text-xl text-neutral-900">Sign in</h1>
+        </div>
+
+        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <div class="space-y-1.5">
+            <label class="block text-xs font-medium text-neutral-700">Username or Email</label>
+            <input 
+              type="text" 
+              id="login-username-input" 
+              placeholder="Username or email" 
+              required 
+              autofocus
+              class="fintech-input w-full h-9 text-xs"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-medium text-neutral-700">Password</label>
+              <button type="button" onclick="showAuthPanel('reset')" class="text-xs text-neutral-600 hover:text-neutral-900 underline font-normal">
+                Forgot password?
+              </button>
+            </div>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="login-password-input" 
+                placeholder="Password" 
+                required 
+                class="fintech-input w-full h-9 text-xs pr-8"
+              />
+              <button type="button" onclick="togglePasswordVisibility('login-password-input', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 focus:outline-none p-1.5 z-10 cursor-pointer flex items-center justify-center" title="Toggle password visibility">
+                <i data-lucide="eye" class="w-3.5 h-3.5 pointer-events-none"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2 pt-0.5">
+            <input type="checkbox" id="login-remember" checked class="rounded border-neutral-300 text-neutral-900 focus:ring-0 w-3.5 h-3.5" />
+            <label for="login-remember" class="text-xs text-neutral-600">Keep me signed in on this device</label>
+          </div>
+
+          <button type="submit" id="btn-login-submit" class="w-full btn-primary h-9 justify-center text-xs font-medium">
+            <span>Sign In</span>
+          </button>
+
+          <div class="relative flex py-1 items-center">
+            <div class="flex-grow border-t border-neutral-200"></div>
+            <span class="flex-shrink mx-3 text-[11px] text-neutral-400">New to ShopStore?</span>
+            <div class="flex-grow border-t border-neutral-200"></div>
+          </div>
+
+          <button type="button" onclick="showAuthPanel('register')" class="w-full h-9 border border-neutral-300 hover:bg-neutral-50 rounded-md text-xs font-medium text-neutral-800 transition flex items-center justify-center">
+            <span>Create your ShopStore account</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- PANEL B: CREATE ACCOUNT / REGISTER -->
+      <div id="panel-auth-register" class="hidden space-y-5">
+        <div>
+          <h1 class="font-heading font-semibold text-xl text-neutral-900">Create Account</h1>
+          <p class="text-xs text-neutral-500 mt-1">Join ShopStore for AI agentic shopping & fast checkouts.</p>
+        </div>
+
+        <form onsubmit="handleRegisterSubmit(event)" class="space-y-3.5">
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-neutral-700">Full Name</label>
+            <input 
+              type="text" 
+              id="register-name-input" 
+              placeholder="Full name" 
+              required 
+              class="fintech-input w-full h-8 text-xs"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="space-y-1">
+              <label class="block text-xs font-medium text-neutral-700">Username</label>
+              <input 
+                type="text" 
+                id="register-username-input" 
+                placeholder="Username" 
+                required 
+                class="fintech-input w-full h-8 text-xs"
+              />
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-medium text-neutral-700">Phone</label>
+              <input 
+                type="tel" 
+                id="register-phone-input" 
+                placeholder="Phone number" 
+                class="fintech-input w-full h-8 text-xs"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-neutral-700">Email Address</label>
+            <input 
+              type="email" 
+              id="register-email-input" 
+              placeholder="Email address" 
+              required 
+              class="fintech-input w-full h-8 text-xs"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-neutral-700">Password</label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="register-password-input" 
+                placeholder="Password (min. 6 characters)" 
+                required 
+                minlength="6"
+                class="fintech-input w-full h-8 text-xs pr-8"
+              />
+              <button type="button" onclick="togglePasswordVisibility('register-password-input', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 focus:outline-none p-1.5 z-10 cursor-pointer flex items-center justify-center" title="Toggle password visibility">
+                <i data-lucide="eye" class="w-3.5 h-3.5 pointer-events-none"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-neutral-700">Delivery Address</label>
+            <input 
+              type="text" 
+              id="register-address-input" 
+              placeholder="Street address" 
+              class="fintech-input w-full h-8 text-xs"
+            />
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-medium text-neutral-700">City & Pincode</label>
+            <input 
+              type="text" 
+              id="register-city-input" 
+              placeholder="City & pincode" 
+              class="fintech-input w-full h-8 text-xs"
+            />
+          </div>
+
+          <button type="submit" id="btn-register-submit" class="w-full btn-primary h-9 justify-center text-xs font-medium mt-2">
+            <span>Create Account</span>
+          </button>
+
+          <div class="text-center pt-2 text-xs text-neutral-500">
+            Already have an account? 
+            <button type="button" onclick="showAuthPanel('login')" class="text-neutral-900 font-semibold underline hover:text-neutral-700 ml-1">
+              Sign in
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- PANEL C: SIMPLE DIRECT PASSWORD RESET -->
+      <div id="panel-auth-reset" class="hidden space-y-5">
+        <div>
+          <h1 class="font-heading font-semibold text-xl text-neutral-900">Reset Password</h1>
+          <p class="text-xs text-neutral-500 mt-1">Enter your username or email and choose your new password.</p>
+        </div>
+
+        <form onsubmit="handleDirectResetPasswordSubmit(event)" class="space-y-4">
+          <div class="space-y-1.5">
+            <label class="block text-xs font-medium text-neutral-700">Username or Email</label>
+            <input 
+              type="text" 
+              id="reset-identity-input" 
+              placeholder="Username or email" 
+              required 
+              class="fintech-input w-full h-9 text-xs"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-xs font-medium text-neutral-700">New Password</label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="reset-newpass-input" 
+                placeholder="Enter new password (min. 4 characters)" 
+                required 
+                minlength="4"
+                class="fintech-input w-full h-9 text-xs pr-8"
+              />
+              <button type="button" onclick="togglePasswordVisibility('reset-newpass-input', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 focus:outline-none p-1.5 z-10 cursor-pointer flex items-center justify-center" title="Toggle password visibility">
+                <i data-lucide="eye" class="w-3.5 h-3.5 pointer-events-none"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-reset-submit" class="w-full btn-primary h-9 justify-center text-xs font-medium mt-1">
+            <span>Update Password</span>
+          </button>
+
+          <div class="text-center pt-1 text-xs text-neutral-500">
+            Remembered your password? 
+            <button type="button" onclick="showAuthPanel('login')" class="text-neutral-900 font-semibold underline hover:text-neutral-700 ml-1">
+              Sign in
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Minimalist Footer -->
+    <div class="mt-8 flex items-center space-x-6 text-xs text-neutral-400">
+      <a href="#" class="hover:text-neutral-600">Conditions of Use</a>
+      <span>•</span>
+      <a href="#" class="hover:text-neutral-600">Privacy Notice</a>
+      <span>•</span>
+      <a href="#" class="hover:text-neutral-600">Help</a>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 2. MAIN LOGGED-IN STORE & ADMIN WORKSPACE -->
+  <!-- ========================================================= -->
+  <div id="view-main-app" class="hidden min-h-screen flex bg-white">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="w-60 bg-white border-r border-[#E5E7EB] flex flex-col justify-between flex-shrink-0 min-h-screen sticky top-0 z-40">
+      <div class="p-4 space-y-6">
+        
+        <!-- Store Brand Header (Click to Return to Store Catalog) -->
+        <div onclick="switchAdminTab('tab-storefront')" class="flex items-center space-x-2.5 px-2 py-1 cursor-pointer group hover:bg-neutral-50 rounded-md transition select-none" title="Return to Store Catalog">
+          <div class="w-7 h-7 rounded bg-[#111827] group-hover:bg-neutral-800 flex items-center justify-center text-white text-xs font-semibold font-heading shadow-sm transition">
+            S
+          </div>
+          <div>
+            <div class="font-heading font-semibold text-sm text-neutral-900 leading-tight group-hover:text-neutral-950">ShopStore</div>
+            <div class="text-[11px] text-neutral-500 font-normal">Customer Storefront</div>
+          </div>
+        </div>
+
+        <!-- STORE NAVIGATION -->
+        <div class="space-y-4">
+          <div class="space-y-0.5">
+            <div class="px-2 pb-1.5 text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">Shopping & AI</div>
+
+            <button onclick="switchAdminTab('tab-storefront')" id="nav-tab-storefront" class="nav-item active">
+              <i data-lucide="shopping-bag" class="w-4 h-4 text-neutral-400"></i>
+              <span>Store Catalog</span>
+            </button>
+
+            <button onclick="switchAdminTab('tab-agent-chat')" id="nav-tab-agent-chat" class="nav-item">
+              <i data-lucide="sparkles" class="w-4 h-4 text-neutral-400"></i>
+              <span>AI Shopping Assistant</span>
+            </button>
+
+            <button onclick="switchAdminTab('tab-orders')" id="nav-tab-orders" class="nav-item">
+              <i data-lucide="package-check" class="w-4 h-4 text-neutral-400"></i>
+              <span>My Orders & Tracking</span>
+            </button>
+
+            <button onclick="switchAdminTab('tab-graphs')" id="nav-tab-graphs" class="nav-item">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-neutral-400"></i>
+              <span>Spending & Graphs</span>
+            </button>
+          </div>
+
+          <div class="space-y-0.5">
+            <div class="px-2 pb-1.5 text-[10px] font-semibold text-neutral-400 uppercase tracking-wider">Account</div>
+
+            <button onclick="switchAdminTab('tab-profile')" id="nav-tab-profile" class="nav-item">
+              <i data-lucide="user-check" class="w-4 h-4 text-neutral-400"></i>
+              <span>Delivery & Profile</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar User Footer -->
+      <div class="p-3.5 border-t border-[#E5E7EB] bg-[#FAFAFA] flex items-center justify-between">
+        <div class="flex items-center space-x-2 min-w-0">
+          <div id="sidebar-user-avatar" class="w-6 h-6 rounded bg-neutral-900 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
+            U
+          </div>
+          <div class="min-w-0">
+            <div id="sidebar-user-name" class="text-xs font-semibold text-neutral-900 truncate">Customer</div>
+            <div class="text-[10px] text-neutral-400">Online</div>
+          </div>
+        </div>
+        <button onclick="handleLogout()" class="text-neutral-400 hover:text-neutral-700 p-1" title="Sign Out">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="flex-1 flex flex-col min-w-0 bg-white">
+      
+      <!-- Top Header Bar -->
+      <header class="h-14 bg-white border-b border-[#E5E7EB] px-8 flex items-center justify-between sticky top-0 z-30">
+        
+        <!-- Left: Location Banner & Search -->
+        <div class="flex items-center space-x-6">
+          <div class="flex items-center space-x-1.5 text-xs text-neutral-600">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-neutral-500"></i>
+            <div>
+              <div class="text-[10px] text-neutral-400 leading-none">Deliver to</div>
+              <div id="header-deliver-location" class="font-medium text-neutral-900 leading-tight">Customer, Location</div>
+            </div>
+          </div>
+
+          <div class="relative w-72">
+            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></i>
+            <input 
+              type="text" 
+              id="top-search-input"
+              placeholder="Search products, orders, categories..." 
+              oninput="handleGlobalSearch(this.value)"
+              class="w-full pl-8 pr-3 h-8 text-xs bg-neutral-50 border border-neutral-200 rounded-md focus:outline-none focus:border-neutral-400 focus:bg-white transition"
+            />
+          </div>
+        </div>
+
+        <!-- Right: Actions -->
+        <div class="flex items-center space-x-4 text-xs">
+          
+          <button id="header-orders-btn" onclick="switchAdminTab('tab-orders')" class="text-left hover:text-neutral-900 transition">
+            <div class="text-[10px] text-neutral-400 leading-none">Hello, <span id="header-user-greeting">User</span></div>
+            <div class="font-semibold text-neutral-900 leading-tight">Returns & Orders</div>
+          </button>
+
+          <button id="header-chat-btn" onclick="switchAdminTab('tab-agent-chat')" class="btn-primary">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>Chat Assistant</span>
+          </button>
+
+          <button onclick="handleLogout()" class="btn-secondary px-2.5" title="Sign Out">
+            <i data-lucide="log-out" class="w-3.5 h-3.5 text-neutral-500"></i>
+            <span class="hidden sm:inline">Sign Out</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Workspace -->
+      <main class="flex-1 px-10 py-8 overflow-y-auto max-w-7xl">
+
+        <!-- ===================================================== -->
+        <!-- TAB 0: CUSTOMER STOREFRONT CATALOG -->
+        <!-- ===================================================== -->
+        <div id="tab-storefront" class="admin-page-view space-y-8">
+          
+          <!-- Storefront Dynamic Hero Banner -->
+          <div class="relative overflow-hidden p-6 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-800 text-white rounded-lg shadow-sm border border-neutral-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all duration-500">
+            <div class="space-y-1.5 flex-1 min-w-0">
+              <div class="inline-flex items-center space-x-1.5 px-2 py-0.5 bg-white/10 rounded text-[11px] font-mono text-emerald-300">
+                <i data-lucide="sparkles" class="w-3 h-3"></i>
+                <span id="hero-banner-badge">Autonomous AI Agentic Commerce</span>
+              </div>
+              <h1 id="hero-banner-title" class="font-heading font-semibold text-2xl tracking-tight text-white transition-opacity duration-300">Athletic Gear & Footwear</h1>
+              <p id="hero-banner-desc" class="text-xs text-neutral-300 max-w-xl leading-relaxed transition-opacity duration-300">
+                Browse our live catalog with verified stock availability. Check out instantly via Razorpay or bargain for dynamic discounts with our AI assistant.
+              </p>
+              <!-- Carousel progress dots -->
+              <div id="hero-banner-dots" class="flex items-center space-x-1.5 pt-2">
+                <span class="w-5 h-1 rounded-full bg-white transition-all"></span>
+                <span class="w-1.5 h-1 rounded-full bg-white/30 transition-all"></span>
+                <span class="w-1.5 h-1 rounded-full bg-white/30 transition-all"></span>
+                <span class="w-1.5 h-1 rounded-full bg-white/30 transition-all"></span>
+                <span class="w-1.5 h-1 rounded-full bg-white/30 transition-all"></span>
+              </div>
+            </div>
+            <button onclick="switchAdminTab('tab-agent-chat')" class="px-4 py-2.5 bg-white text-neutral-900 rounded-md text-xs font-semibold hover:bg-neutral-100 transition shadow-sm flex items-center space-x-1.5 whitespace-nowrap flex-shrink-0">
+              <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+              <span>Talk to AI Assistant</span>
+            </button>
+          </div>
+
+          <!-- Catalog Toolbar: Filters & Count -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-200">
+            <div class="flex items-center space-x-2 overflow-x-auto text-xs">
+              <button onclick="filterStorefrontCategory('all')" class="category-filter-btn active px-3 py-1.5 rounded-full border border-neutral-900 bg-neutral-900 text-white font-medium">All Items</button>
+              <button onclick="filterStorefrontCategory('Footwear')" class="category-filter-btn px-3 py-1.5 rounded-full border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50">Footwear</button>
+              <button onclick="filterStorefrontCategory('Wearables')" class="category-filter-btn px-3 py-1.5 rounded-full border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50">Wearables</button>
+              <button onclick="filterStorefrontCategory('Apparel')" class="category-filter-btn px-3 py-1.5 rounded-full border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50">Apparel</button>
+              <button onclick="filterStorefrontCategory('Accessories')" class="category-filter-btn px-3 py-1.5 rounded-full border border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50">Accessories</button>
+            </div>
+            <div id="storefront-items-count" class="text-xs text-neutral-400 font-mono">15 Products Available</div>
+          </div>
+
+          <!-- Products Grid -->
+          <div id="storefront-products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Rendered by adminDashboard.js -->
+          </div>
+        </div>
+
+
+
+        <!-- ===================================================== -->
+        <!-- TAB 3: ORDERS (Amazon-Style Customer Orders Hub) -->
+        <!-- ===================================================== -->
+        <div id="tab-orders" class="admin-page-view hidden space-y-6">
+          
+          <!-- Header & Search Controls -->
+          <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-200">
+            <div>
+              <h1 class="font-heading font-semibold text-2xl text-neutral-900 tracking-tight">Your Orders & Shipments</h1>
+              <p class="text-xs text-neutral-500 mt-1">Track customer orders, delivery status, and zero-redirect payment settlements.</p>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+              <div class="relative w-64">
+                <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></i>
+                <input 
+                  type="text" 
+                  placeholder="Search orders, items, customers..." 
+                  oninput="searchOrders(this.value)"
+                  class="fintech-input w-full pl-8 text-xs"
+                />
+              </div>
+              <button onclick="fetchAndRenderOrders()" class="btn-secondary">
+                <i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-neutral-500"></i>
+                <span>Refresh</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter Status Navigation & Customer Filter -->
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-200 text-xs">
+            <div class="flex items-center space-x-6 font-medium">
+              <button onclick="setOrderFilter('all')" class="order-filter-btn active py-2.5 border-b-2 border-neutral-900 text-neutral-900 font-semibold">
+                All Orders
+              </button>
+              <button onclick="setOrderFilter('paid')" class="order-filter-btn py-2.5 border-b-2 border-transparent text-neutral-500 hover:text-neutral-800">
+                Paid & Settled
+              </button>
+              <button onclick="setOrderFilter('chat')" class="order-filter-btn py-2.5 border-b-2 border-transparent text-neutral-500 hover:text-neutral-800">
+                In-App Conversational
+              </button>
+              <button onclick="setOrderFilter('m2m')" class="order-filter-btn py-2.5 border-b-2 border-transparent text-neutral-500 hover:text-neutral-800">
+                AP2 Autonomous Buyer
+              </button>
+            </div>
+
+            <div class="flex items-center space-x-2 py-1">
+              <span class="text-neutral-500 font-medium">Customer:</span>
+              <select id="orders-customer-filter-select" onchange="setOrderCustomerFilter(this.value)" class="fintech-input h-7 text-xs">
+                <option value="all">All Customers</option>
+                <option value="cust_01">Rahul Sharma</option>
+                <option value="cust_02">Sneha Kapur</option>
+                <option value="cust_03">Vikram Mehta</option>
+                <option value="cust_04">Aditi Roy</option>
+                <option value="cust_05">Karan Joshi</option>
+                <option value="cust_m2m">Autonomous AI Buyer</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Customer Scope Banner (Dynamic) -->
+          <div id="orders-customer-scope-banner" class="hidden"></div>
+
+          <!-- Amazon-Style Order Cards Container -->
+          <div id="orders-cards-container" class="space-y-4 pt-2">
+            <!-- Populated by adminDashboard.js -->
+          </div>
+        </div>
+
+
+
+        <!-- ===================================================== -->
+        <!-- TAB 7: IN-APP CHECKOUT CHAT -->
+        <!-- ===================================================== -->
+        <div id="tab-agent-chat" class="admin-page-view hidden space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-neutral-200">
+            <div>
+              <h1 class="font-heading font-semibold text-2xl text-neutral-900 tracking-tight">Conversational In-App Checkout</h1>
+              <p class="text-xs text-neutral-500 mt-1">Test buyer bargaining and zero-redirect Razorpay modal checkout.</p>
+            </div>
+            <button onclick="clearChat()" class="btn-secondary">Reset Session</button>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-8 border border-neutral-200 rounded-md flex flex-col h-[580px] overflow-hidden">
+              
+              <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-4 text-xs"></div>
+              
+              <!-- Quick Chips -->
+              <div class="px-4 py-2.5 bg-neutral-50 border-t border-neutral-100 flex items-center space-x-2 overflow-x-auto text-[11px]">
+                <span class="text-neutral-400 font-mono">Quick:</span>
+                <button onclick="sendQuickPrompt('Show All Products')" class="btn-ghost bg-white border border-neutral-200 whitespace-nowrap">Catalog Grid</button>
+                <button onclick="sendQuickPrompt('Can you give me a 25% discount on the AeroPulse shoes?')" class="btn-ghost bg-white border border-neutral-200 whitespace-nowrap">Bargain 25% (Bounded)</button>
+                <button onclick="sendQuickPrompt('Show me a workout bundle combo')" class="btn-ghost bg-white border border-neutral-200 whitespace-nowrap">Upsell Bundle</button>
+                <button onclick="sendQuickPrompt('I want to buy right now')" class="btn-ghost bg-white border border-neutral-200 whitespace-nowrap text-neutral-900 font-medium">Buy with Razorpay</button>
+              </div>
+
+              <!-- Input Form -->
+              <form id="chat-form" onsubmit="handleChatSubmit(event)" class="p-3 bg-white border-t border-neutral-100 flex items-center space-x-2">
+                <input type="text" id="chat-input" placeholder="Type a message (e.g. 'Can I get running shoes under ₹2000?')..." class="fintech-input flex-1" autocomplete="off" />
+                <button type="submit" class="btn-primary">
+                  <span>Send</span>
+                  <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+                </button>
+              </form>
+            </div>
+
+            <!-- Explainability Sidebar -->
+            <div class="lg:col-span-4 space-y-4">
+              <div class="pb-2 border-b border-neutral-100">
+                <h2 class="font-heading font-semibold text-base text-neutral-900">Policy Reasoning</h2>
+                <p class="text-xs text-neutral-500 mt-0.5">Step-by-step trace of policy checks and pricing logic.</p>
+              </div>
+              <div id="mini-trace-view" class="space-y-2 text-xs max-h-[480px] overflow-y-auto">
+                <div class="text-neutral-400 p-4 text-center border border-dashed border-neutral-200 rounded-md">
+                  <i data-lucide="shield" class="w-5 h-5 mx-auto mb-1 text-neutral-300"></i>
+                  <span>Send a message in chat to inspect live agent step execution.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- TAB: SPENDING & PRICE GRAPHS -->
+        <!-- ===================================================== -->
+        <div id="tab-graphs" class="admin-page-view hidden space-y-8">
+          
+          <!-- Header -->
+          <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-neutral-200">
+            <div>
+              <h1 class="font-heading font-semibold text-2xl text-neutral-900 tracking-tight">Spending & Market Trends</h1>
+              <p class="text-xs text-neutral-500 mt-1">Visualize your purchase volume, money saved via AI bargaining, and catalog price index.</p>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+              <button onclick="renderSpendingAndTrendsCharts()" class="btn-secondary">
+                <i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-neutral-500"></i>
+                <span>Refresh Charts</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Summary Strip -->
+          <div class="grid grid-cols-2 md:grid-cols-4 py-4 border-y border-neutral-200 divide-y md:divide-y-0 md:divide-x divide-neutral-200">
+            <div class="pr-6 py-2">
+              <div class="text-xs font-medium text-neutral-500">Total Purchase Volume</div>
+              <div id="graphs-kpi-spend" class="text-2xl font-bold font-mono text-neutral-950 mt-1">₹3,596</div>
+              <div class="text-[11px] text-neutral-400 mt-0.5">Across verified settlements</div>
+            </div>
+
+            <div class="px-6 py-2">
+              <div class="text-xs font-medium text-neutral-500">AI Bargaining Savings</div>
+              <div id="graphs-kpi-savings" class="text-2xl font-bold font-mono text-emerald-700 mt-1">₹680</div>
+              <div class="text-[11px] text-emerald-600 mt-0.5 font-medium">+15% average saved</div>
+            </div>
+
+            <div class="px-6 py-2">
+              <div class="text-xs font-medium text-neutral-500">Average Discount Rate</div>
+              <div id="graphs-kpi-discount-avg" class="text-2xl font-bold font-mono text-neutral-950 mt-1">12.8%</div>
+              <div class="text-[11px] text-neutral-400 mt-0.5">Bounded below 15% cap</div>
+            </div>
+
+            <div class="pl-6 py-2">
+              <div class="text-xs font-medium text-neutral-500">Catalog SKUs Monitored</div>
+              <div id="graphs-kpi-skus" class="text-2xl font-bold font-mono text-neutral-950 mt-1">15</div>
+              <div class="text-[11px] text-neutral-400 mt-0.5">Live stock available</div>
+            </div>
+          </div>
+
+          <!-- Row 1: Spending Velocity Chart & Category Breakdown Chart -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Main Chart: Spending & AI Savings Over Time -->
+            <div class="lg:col-span-8 bg-white border border-neutral-200 rounded-lg p-5 space-y-4 shadow-sm">
+              <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
+                <div>
+                  <h2 class="font-heading font-semibold text-sm text-neutral-900">Spending & AI Savings Velocity</h2>
+                  <p class="text-xs text-neutral-500 mt-0.5">Daily purchase value vs amount saved using AI dynamic bargaining.</p>
+                </div>
+                <div class="flex items-center space-x-2 text-xs">
+                  <span class="inline-flex items-center space-x-1 text-neutral-700">
+                    <span class="w-2.5 h-2.5 rounded bg-neutral-900 inline-block"></span>
+                    <span>Spend (₹)</span>
+                  </span>
+                  <span class="inline-flex items-center space-x-1 text-emerald-700 ml-2">
+                    <span class="w-2.5 h-2.5 rounded bg-emerald-500 inline-block"></span>
+                    <span>Saved (₹)</span>
+                  </span>
+                </div>
+              </div>
+
+              <div class="h-64 relative">
+                <canvas id="chart-spending-savings"></canvas>
+              </div>
+            </div>
+
+            <!-- Side Chart: Category Distribution -->
+            <div class="lg:col-span-4 bg-white border border-neutral-200 rounded-lg p-5 space-y-4 shadow-sm flex flex-col justify-between">
+              <div class="pb-3 border-b border-neutral-100">
+                <h2 class="font-heading font-semibold text-sm text-neutral-900">Category Share</h2>
+                <p class="text-xs text-neutral-500 mt-0.5">Distribution of items and volume across categories.</p>
+              </div>
+
+              <div class="h-56 relative flex items-center justify-center">
+                <canvas id="chart-category-doughnut"></canvas>
+              </div>
+
+              <div id="graphs-category-legend" class="grid grid-cols-2 gap-2 text-[11px] pt-2 border-t border-neutral-100 text-neutral-600">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Row 2: Catalog Price & Stock Distribution -->
+          <div class="bg-white border border-neutral-200 rounded-lg p-5 space-y-4 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
+              <div>
+                <h2 class="font-heading font-semibold text-sm text-neutral-900">Live Catalog Price & Inventory Index</h2>
+                <p class="text-xs text-neutral-500 mt-0.5">Compare pricing tiers and stock quantities across all athletic products.</p>
+              </div>
+              <span class="text-xs text-neutral-400 font-mono">15 Active Products</span>
+            </div>
+
+            <div class="h-64 relative">
+              <canvas id="chart-products-stock-price"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- TAB 9: CUSTOMER PROFILE & ADDRESS -->
+        <!-- ===================================================== -->
+        <div id="tab-profile" class="admin-page-view hidden space-y-6">
+          <div class="pb-4 border-b border-neutral-200">
+            <h1 class="font-heading font-semibold text-2xl text-neutral-900 tracking-tight">Delivery Address & Account</h1>
+            <p class="text-xs text-neutral-500 mt-1">Manage your default shipping location and contact information for AI checkouts.</p>
+          </div>
+
+          <div class="max-w-xl bg-white border border-neutral-200 rounded-lg p-6 space-y-6 shadow-sm">
+            <div class="flex items-center space-x-3 pb-4 border-b border-neutral-100">
+              <div id="profile-avatar" class="w-12 h-12 rounded-full bg-neutral-900 text-white flex items-center justify-center font-heading text-lg font-semibold">
+                U
+              </div>
+              <div>
+                <div id="profile-display-name" class="font-heading font-semibold text-base text-neutral-900">Customer</div>
+                <div id="profile-display-meta" class="text-xs text-neutral-500 font-mono">@user • email@example.com</div>
+              </div>
+            </div>
+
+            <form onsubmit="handleUpdateProfile(event)" class="space-y-4 text-xs">
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="block font-medium text-neutral-700">Full Name</label>
+                  <input type="text" id="profile-name-input" required class="fintech-input w-full" />
+                </div>
+                <div class="space-y-1">
+                  <label class="block font-medium text-neutral-700">Phone Number</label>
+                  <input type="tel" id="profile-phone-input" class="fintech-input w-full" />
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <label class="block font-medium text-neutral-700">Street Address</label>
+                <input type="text" id="profile-address-input" required class="fintech-input w-full" />
+              </div>
+
+              <div class="space-y-1">
+                <label class="block font-medium text-neutral-700">City & Pincode</label>
+                <input type="text" id="profile-city-input" required class="fintech-input w-full" />
+              </div>
+
+              <div class="pt-2">
+                <button type="submit" id="btn-save-profile" class="btn-primary">
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+
+
+  <!-- In-App Razorpay Checkout Simulator Modal -->
+  <div id="rzp-sim-modal" class="fixed inset-0 fintech-modal-overlay z-50 flex items-center justify-center hidden p-4">
+    <div class="fintech-modal max-w-sm w-full p-5 space-y-4">
+      <div class="flex items-center justify-between border-b border-neutral-100 pb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-5 h-5 rounded bg-[#111827] flex items-center justify-center font-bold text-white text-[10px]">R</div>
+          <span class="font-heading font-semibold text-xs text-neutral-900">Razorpay In-App Checkout</span>
+        </div>
+        <button onclick="closeSimulatorModal()" class="text-neutral-400 hover:text-neutral-600">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="bg-neutral-50 p-3 rounded border border-neutral-200 space-y-1.5 text-xs font-mono">
+        <div class="flex justify-between text-neutral-500">
+          <span>Order ID:</span>
+          <span id="modal-order-id" class="text-neutral-900 font-semibold truncate ml-2">order_test_123</span>
+        </div>
+        <div class="flex justify-between text-neutral-500">
+          <span>Item:</span>
+          <span id="modal-product-name" class="text-neutral-800 font-medium truncate ml-2">AeroPulse Nitro 4</span>
+        </div>
+        <div class="flex justify-between text-neutral-500">
+          <span>Amount:</span>
+          <span id="modal-amount" class="text-neutral-900 font-semibold">₹1899.00</span>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <span class="text-xs text-neutral-600 font-medium">Payment Method:</span>
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <button onclick="selectPaymentMethod('UPI')" class="pay-method-btn active p-2 rounded border border-neutral-900 bg-neutral-900 text-center font-medium text-white">
+            UPI
+          </button>
+          <button onclick="selectPaymentMethod('CARD')" class="pay-method-btn p-2 rounded border border-neutral-200 bg-white text-center font-medium text-neutral-700 hover:border-neutral-300">
+            Card
+          </button>
+          <button onclick="selectPaymentMethod('NETBANKING')" class="pay-method-btn p-2 rounded border border-neutral-200 bg-white text-center font-medium text-neutral-700 hover:border-neutral-300">
+            Netbanking
+          </button>
+        </div>
+      </div>
+
+      <div class="pt-1 flex space-x-2">
+        <button onclick="completeSimulatedPayment(true)" class="btn-primary flex-1">
+          Authorize Payment
+        </button>
+        <button onclick="completeSimulatedPayment(false)" class="btn-secondary">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Invoice Modal (Amazon-Style Itemized Receipt) -->
+  <div id="order-invoice-modal" class="fixed inset-0 fintech-modal-overlay z-50 flex items-center justify-center hidden p-4">
+    <div class="fintech-modal max-w-lg w-full p-6 space-y-5">
+      <div class="flex items-center justify-between border-b border-neutral-100 pb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-6 h-6 rounded bg-[#111827] flex items-center justify-center text-white text-xs font-heading font-semibold">S</div>
+          <div>
+            <h2 class="font-heading font-semibold text-sm text-neutral-900">Order Invoice & Receipt</h2>
+            <div class="text-[11px] text-neutral-400 font-mono">Razorpay Verified Settlement</div>
+          </div>
+        </div>
+        <button onclick="closeOrderInvoiceModal()" class="text-neutral-400 hover:text-neutral-600">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="grid grid-cols-2 gap-4 bg-neutral-50 p-3.5 rounded border border-neutral-200">
+          <div>
+            <div class="text-[11px] uppercase tracking-wider text-neutral-400 font-mono">Order ID</div>
+            <div id="inv-order-id" class="font-mono font-medium text-neutral-900 mt-0.5">order_123</div>
+            <div class="text-[11px] text-neutral-500 mt-1" id="inv-date">29 Aug 2026</div>
+          </div>
+          <div>
+            <div class="text-[11px] uppercase tracking-wider text-neutral-400 font-mono">Payment ID</div>
+            <div id="inv-payment-id" class="font-mono font-medium text-neutral-900 mt-0.5">pay_123</div>
+            <div class="text-[11px] text-emerald-700 font-medium mt-1">Status: Captured & Settled</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-neutral-400 font-mono mb-1">Delivered To</div>
+          <div class="font-medium text-neutral-900" id="inv-customer">Rahul Sharma</div>
+          <div class="text-neutral-500 text-[11px]" id="inv-address">42 MG Road, Indiranagar, Bengaluru 560038</div>
+          <div class="text-neutral-500 text-[11px] mt-0.5" id="inv-channel">Channel: In-App Conversational Checkout</div>
+        </div>
+
+        <div class="border-t border-neutral-200 pt-3 space-y-2">
+          <div class="flex justify-between items-center py-1">
+            <div>
+              <div class="font-medium text-neutral-900" id="inv-item-name">ShopStore Nitro 4 Running Shoes</div>
+              <div class="text-[11px] text-neutral-400 font-mono" id="inv-item-sku">SHOE-RUN-001</div>
+            </div>
+            <div class="font-mono font-medium text-neutral-900" id="inv-item-price">₹1,899.00</div>
+          </div>
+
+          <div class="flex justify-between text-neutral-500 pt-1 border-t border-neutral-100 text-[11px]">
+            <span>Agent Policy Discount</span>
+            <span class="font-mono text-emerald-700 font-medium" id="inv-discount">- ₹190.00</span>
+          </div>
+
+          <div class="flex justify-between text-neutral-500 text-[11px]">
+            <span>GST / Shipping</span>
+            <span class="font-mono">Free Express Shipping</span>
+          </div>
+
+          <div class="flex justify-between items-center text-sm font-semibold text-neutral-950 pt-2 border-t border-neutral-200">
+            <span>Grand Total</span>
+            <span class="font-mono" id="inv-total">₹1,709.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end space-x-2">
+        <button onclick="window.print()" class="btn-secondary">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span>Print Receipt</span>
+        </button>
+        <button onclick="closeOrderInvoiceModal()" class="btn-primary">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/catalog.js"></script>
+  <script src="/js/audit.js"></script>
+  <script src="/js/buyerAgent.js"></script>
+  <script src="/js/chat.js"></script>
+  <script src="/js/adminDashboard.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

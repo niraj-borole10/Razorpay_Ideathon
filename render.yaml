@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: razorpay-agentic-commerce
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: RAZORPAY_KEY_ID
+        value: rzp_test_TVTQwEmmKs24uu
+      - key: RAZORPAY_KEY_SECRET
+        value: HX0VgZoyjy-CQjHLykPnpeapV
+      - key: RAZORPAY_WEBHOOK_SECRET
+        value: rzp_whsec_agentic_test_secret
+      - key: MONGODB_URI
+        value: mongodb+srv://nirajborole0_db_user:D1Wq0l2cMxlgXdea@cluster0.mvnckzw.mongodb.net/shopstore?retryWrites=true&w=majority&appName=Cluster0
+      - key: JWT_SECRET
+        value: shopstore_jwt_super_secret_key_2026_agentic
+      - key: MAX_ALLOWED_DISCOUNT_PERCENTAGE
+        value: 15
+      - key: MAX_TRANSACTION_LIMIT_INR
+        value: 100000
+      - key: MIN_MARGIN_FLOOR_PERCENTAGE
+        value: 20
+      - key: EXPIRATION_TIME_MINUTES
+        value: 15
+      - key: MOCK_RAZORPAY_MODE
+        value: false

@@ -1,0 +1,274 @@
+/* ==========================================================================
+   AEROPULSE / RAZORPAY MERCHANT ADMIN — OPEN EDITORIAL FINTECH DESIGN
+   No "boxed-cards everywhere" — Open canvas layout with whitespace & thin rules
+   Typography: Inter Tight (Headings) & Inter (UI Body) & JetBrains Mono (Financial)
+   ========================================================================== */
+
+:root {
+  /* Canvas & Surfaces */
+  --bg-canvas: #FFFFFF;
+  --bg-subtle: #F9FAFB;
+  --bg-hover: #F3F4F6;
+
+  /* Hairlines */
+  --border-hairline: #E5E7EB;
+  --border-subtle: #F3F4F6;
+  --border-strong: #D1D5DB;
+
+  /* Typography */
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #6B7280;
+  --text-tertiary: #9CA3AF;
+
+  /* Accent */
+  --accent-primary: #111827;
+  --accent-cobalt: #1D4ED8;
+
+  /* Semantic Deltas */
+  --emerald-text: #047857;
+  --emerald-bg: #F0FDF4;
+  --amber-text: #B45309;
+  --amber-bg: #FFFBEB;
+  --rose-text: #B91C1C;
+  --rose-bg: #FEF2F2;
+
+  /* Radius & Shadows */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --shadow-floating: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Base */
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: 'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D1D5DB;
+}
+
+/* Sidebar Navigation Items */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--text-muted);
+  transition: all 0.12s ease;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background-color: #F3F4F6;
+  color: var(--text-primary);
+  font-weight: 550;
+}
+
+.nav-item.active i {
+  color: var(--text-primary);
+}
+
+/* Buttons */
+.btn-primary {
+  height: 34px;
+  background-color: var(--accent-primary);
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  transition: background-color 0.12s ease, opacity 0.12s ease;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #000000;
+}
+
+.btn-secondary {
+  height: 34px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-hairline);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: #F9FAFB;
+  border-color: var(--border-strong);
+}
+
+.btn-ghost {
+  height: 30px;
+  background-color: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: background-color 0.12s ease, color 0.12s ease;
+  cursor: pointer;
+}
+
+.btn-ghost:hover {
+  background-color: #F3F4F6;
+  color: var(--text-primary);
+}
+
+/* Inputs */
+.fintech-input {
+  height: 34px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.fintech-input:focus {
+  outline: none;
+  border-color: #9CA3AF;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.06);
+}
+
+/* Open Tables (Direct Canvas, Row Dividers Only, No Box Wrapper) */
+.fintech-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+  font-size: 13px;
+}
+
+.fintech-table th {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-hairline);
+  background: transparent;
+}
+
+.fintech-table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--border-hairline);
+  color: var(--text-primary);
+}
+
+.fintech-table tbody tr {
+  transition: background-color 0.1s ease;
+}
+
+.fintech-table tbody tr:hover {
+  background-color: #F9FAFB;
+}
+
+/* Status Badges */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  border: 1px solid transparent;
+}
+
+.badge-paid {
+  background-color: var(--emerald-bg);
+  color: var(--emerald-text);
+  border-color: #DCFCE7;
+}
+
+.badge-pending {
+  background-color: #F3F4F6;
+  color: #374151;
+  border-color: #E5E7EB;
+}
+
+.badge-warning {
+  background-color: var(--amber-bg);
+  color: var(--amber-text);
+  border-color: #FEF3C7;
+}
+
+.badge-neutral {
+  background-color: #F3F4F6;
+  color: var(--text-secondary);
+  border-color: var(--border-hairline);
+}
+
+/* Modals */
+.fintech-modal-overlay {
+  background-color: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(2px);
+}
+
+.fintech-modal {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal);
+}
