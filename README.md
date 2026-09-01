@@ -107,7 +107,6 @@
 - **Mathematical Bounding**: Requests for excessive discounts (e.g. 30% or 50%) are automatically clamped to the merchant-safe maximum of 15% with plain-text explanation.
 - **Cryptographic Gate**: Orders are validated via HMAC-SHA256 signatures before being recorded as paid.
 - **Self-Healing Fallback**: If an in-app session expires or network disconnects, the system automatically generates a shareable Razorpay Payment Link so sales are never dropped.
-
 ---
 
 ## 📁 Repository Directory Structure
