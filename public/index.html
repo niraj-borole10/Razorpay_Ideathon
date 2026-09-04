@@ -599,9 +599,9 @@
             </div>
             
             <div class="flex items-center space-x-2">
-              <button onclick="renderSpendingAndTrendsCharts()" class="btn-secondary">
-                <i data-lucide="rotate-cw" class="w-3.5 h-3.5 text-neutral-500"></i>
-                <span>Refresh Charts</span>
+              <button id="btn-refresh-charts" onclick="renderSpendingAndTrendsCharts()" class="btn-secondary">
+                <i data-lucide="rotate-cw" id="icon-refresh-charts" class="w-3.5 h-3.5 text-neutral-500"></i>
+                <span id="text-refresh-charts">Refresh Charts</span>
               </button>
             </div>
           </div>
@@ -882,11 +882,11 @@
   </div>
 
   <!-- Scripts -->
-  <script src="/js/catalog.js"></script>
-  <script src="/js/audit.js"></script>
-  <script src="/js/buyerAgent.js"></script>
-  <script src="/js/chat.js"></script>
-  <script src="/js/adminDashboard.js"></script>
+  <script src="/js/catalog.js?v=2.0.2"></script>
+  <script src="/js/audit.js?v=2.0.2"></script>
+  <script src="/js/buyerAgent.js?v=2.0.2"></script>
+  <script src="/js/chat.js?v=2.0.2"></script>
+  <script src="/js/adminDashboard.js?v=2.0.2"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) lucide.createIcons();

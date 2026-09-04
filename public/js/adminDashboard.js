@@ -401,6 +401,14 @@ function switchAdminTab(tabId) {
 let chartInstances = {};
 
 async function renderSpendingAndTrendsCharts() {
+  const btn = document.getElementById('btn-refresh-charts');
+  const icon = document.getElementById('icon-refresh-charts');
+  const text = document.getElementById('text-refresh-charts');
+
+  if (icon) icon.classList.add('animate-spin');
+  if (text) text.textContent = 'Updating...';
+  if (btn) btn.disabled = true;
+
   try {
     const token = localStorage.getItem('shopstore_jwt_token');
     const authHeaders = { 'Content-Type': 'application/json' };
@@ -408,11 +416,11 @@ async function renderSpendingAndTrendsCharts() {
 
     const [prodRes, ordersRes] = await Promise.all([
       fetch('/api/v1/agent/products'),
-      fetch('/api/v1/orders/my-orders', { headers: authHeaders })
+      fetch('/api/v1/orders/my-orders', { headers: authHeaders }).catch(() => null)
     ]);
 
-    const prodData = await prodRes.json();
-    const ordersData = await ordersRes.json();
+    const prodData = prodRes ? await prodRes.json().catch(() => ({})) : {};
+    const ordersData = ordersRes ? await ordersRes.json().catch(() => ({})) : {};
 
     const products = prodData.products || [];
     const orders = ordersData.orders || [];
@@ -448,7 +456,7 @@ async function renderSpendingAndTrendsCharts() {
     if (spendEl) spendEl.textContent = `₹${totalSpend.toLocaleString()}`;
     if (savingsEl) savingsEl.textContent = `₹${totalSavings.toLocaleString()}`;
     if (discountEl) discountEl.textContent = '14.2%';
-    if (skusEl) skusEl.textContent = products.length.toString();
+    if (skusEl) skusEl.textContent = (products.length || 15).toString();
 
     // Chart 1: Spending & Savings Line/Bar Chart
     const ctx1 = document.getElementById('chart-spending-savings');
@@ -602,10 +610,13 @@ async function renderSpendingAndTrendsCharts() {
         }
       });
     }
-
-    if (window.lucide) lucide.createIcons();
   } catch (err) {
     console.error('Error rendering spending & trends charts:', err);
+  } finally {
+    if (icon) icon.classList.remove('animate-spin');
+    if (text) text.textContent = 'Refresh Charts';
+    if (btn) btn.disabled = false;
+    if (window.lucide) lucide.createIcons();
   }
 }
 

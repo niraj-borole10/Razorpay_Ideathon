@@ -14,8 +14,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static frontend assets
-app.use(express.static(path.join(__dirname, '../public')));
+// Serve static frontend assets with revalidation headers
+app.use(express.static(path.join(__dirname, '../public'), {
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
 // Mount API routes
 app.use('/api/v1', apiRouter);
