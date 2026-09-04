@@ -1485,8 +1485,25 @@ function searchOrders(query) {
 }
 
 async function fetchAndRenderOrders() {
-  await refreshOverviewStats();
-  renderAmazonOrderCards();
+  const btn = document.getElementById('btn-refresh-orders');
+  const icon = document.getElementById('icon-refresh-orders');
+  const text = document.getElementById('text-refresh-orders');
+
+  if (icon) icon.classList.add('animate-spin');
+  if (text) text.textContent = 'Updating...';
+  if (btn) btn.disabled = true;
+
+  try {
+    await refreshOverviewStats();
+    renderAmazonOrderCards();
+  } catch (err) {
+    console.error('Error fetching orders:', err);
+  } finally {
+    if (icon) icon.classList.remove('animate-spin');
+    if (text) text.textContent = 'Refresh';
+    if (btn) btn.disabled = false;
+    if (window.lucide) lucide.createIcons();
+  }
 }
 
 function renderAmazonOrderCards() {
@@ -1494,7 +1511,7 @@ function renderAmazonOrderCards() {
   const scopeBanner = document.getElementById('orders-customer-scope-banner');
   if (!container) return;
 
-  let filtered = dashboardState.orders;
+  let filtered = dashboardState.orders || [];
 
   // By default, filter strictly to the currently logged in user
   if (dashboardState.activeCustomerFilter === 'self' && dashboardState.currentUser) {
@@ -1548,24 +1565,29 @@ function renderAmazonOrderCards() {
     : dashboardState.currentUser;
 
   if (displayUser && scopeBanner) {
+    const displayNameStr = displayUser.name || displayUser.username || 'Verified Customer';
+    const initialChar = displayNameStr.charAt(0).toUpperCase() || 'U';
+    const displayAddr = displayUser.address || 'Standard Delivery Address';
+    const displayPhone = displayUser.phone || 'Verified Customer';
+    const totalUserSpend = filtered.reduce((sum, o) => sum + (Number(o.amount) || 0), 0);
+
     scopeBanner.classList.remove('hidden');
     scopeBanner.innerHTML = `
       <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-neutral-50 border border-neutral-200 rounded text-xs">
         <div class="flex items-center space-x-3">
           <div class="w-8 h-8 rounded bg-neutral-900 text-white font-heading font-semibold flex items-center justify-center text-xs">
-            ${displayUser.name.charAt(0)}
+            ${initialChar}
           </div>
           <div>
-            <div class="font-heading font-semibold text-neutral-900 text-sm">Your Orders (${displayUser.name})</div>
-            <div class="text-neutral-500 text-[11px]">Delivery Address: ${displayUser.address} • Phone: ${displayUser.phone}</div>
+            <div class="font-heading font-semibold text-neutral-900 text-sm">Your Orders (${displayNameStr})</div>
+            <div class="text-neutral-500 text-[11px]">Delivery Address: ${displayAddr} • Phone: ${displayPhone}</div>
           </div>
         </div>
         <div class="flex items-center space-x-3">
           <div class="text-right font-mono tabular-nums">
             <div class="font-semibold text-neutral-900">${filtered.length} Orders Placed</div>
-            <div class="text-[11px] text-neutral-500">Total Spent: ₹${displayUser.totalSpend.toLocaleString()}</div>
+            <div class="text-[11px] text-neutral-500">Total Spent: ₹${totalUserSpend.toLocaleString()}</div>
           </div>
-          ${dashboardState.activeCustomerFilter !== 'all' ? `<button onclick="setOrderCustomerFilter('all')" class="btn-ghost text-xs">View Storewide Orders</button>` : `<button onclick="setOrderCustomerFilter('self')" class="btn-ghost text-xs">View My Orders Only</button>`}
         </div>
       </div>
     `;
