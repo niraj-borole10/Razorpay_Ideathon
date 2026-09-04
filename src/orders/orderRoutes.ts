@@ -9,12 +9,14 @@ export const orderRouter = Router();
  */
 orderRouter.get('/my-orders', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userIdentifier = req.user?.userId || req.user?.username || (req.query.user as string) || (req.headers['x-user-id'] as string);
+    const userIdentifier = req.user?.userId || req.user?.username || req.user?.name || req.user?.email || (req.query.user as string) || (req.headers['x-user-id'] as string);
 
     if (!userIdentifier) {
+      const allOrders = await orderService.getAllOrders();
       res.json({
         status: 'success',
-        orders: []
+        count: allOrders.length,
+        orders: allOrders
       });
       return;
     }

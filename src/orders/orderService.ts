@@ -221,7 +221,9 @@ export class OrderService {
           $or: [
             { userId: clean },
             { userId: `cust_${clean}` },
-            { username: clean }
+            { username: clean },
+            { customerEmail: clean },
+            { customerName: { $regex: clean, $options: 'i' } }
           ]
         }).sort({ createdAt: -1 });
 
@@ -235,7 +237,9 @@ export class OrderService {
     return fallbackOrders.filter(o => 
       o.userId?.toLowerCase() === clean ||
       o.userId?.toLowerCase() === `cust_${clean}` ||
-      o.username?.toLowerCase() === clean
+      o.username?.toLowerCase() === clean ||
+      o.customerEmail?.toLowerCase() === clean ||
+      (o.customerName && o.customerName.toLowerCase().includes(clean))
     );
   }
 

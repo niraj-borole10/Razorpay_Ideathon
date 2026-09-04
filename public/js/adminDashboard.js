@@ -604,16 +604,26 @@ async function renderSpendingAndTrendsCharts() {
 
 async function refreshOverviewStats() {
   try {
-    const [prodRes, auditRes] = await Promise.all([
+    const token = localStorage.getItem('shopstore_jwt_token');
+    const authHeaders = { 'Content-Type': 'application/json' };
+    if (token) authHeaders['Authorization'] = `Bearer ${token}`;
+    if (dashboardState.currentUser?.id || dashboardState.currentUser?.userId) {
+      authHeaders['x-user-id'] = dashboardState.currentUser.userId || dashboardState.currentUser.id;
+    }
+
+    const [prodRes, auditRes, ordersRes] = await Promise.all([
       fetch('/api/v1/agent/products'),
-      fetch('/api/v1/audit/logs')
+      fetch('/api/v1/audit/logs'),
+      fetch('/api/v1/orders/all', { headers: authHeaders }).catch(() => null)
     ]);
 
     const prodData = await prodRes.json();
     const auditData = await auditRes.json();
+    const ordersData = ordersRes ? await ordersRes.json().catch(() => ({})) : {};
 
     dashboardState.products = prodData.products || [];
     const traces = auditData.traces || [];
+    const rawApiOrders = ordersData.orders || [];
 
     // Helper to resolve product metadata
     const resolveProductMeta = (skuOrName) => {
@@ -638,6 +648,40 @@ async function refreshOverviewStats() {
       }
       return matched;
     };
+
+    // Format real orders directly from database / API
+    const backendOrders = rawApiOrders.map(o => {
+      const orderDateObj = o.createdAt ? new Date(o.createdAt) : new Date();
+      const formattedDate = orderDateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + orderDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const prod = resolveProductMeta(o.sku || o.item);
+
+      return {
+        id: o.orderId || o.id,
+        paymentId: o.paymentId || 'pay_live_capture',
+        traceId: o.traceId || '',
+        customer: o.customerName || (dashboardState.currentUser?.name || 'Verified Customer'),
+        customerId: o.userId || (dashboardState.currentUser ? (dashboardState.currentUser.userId || dashboardState.currentUser.id) : 'cust_active'),
+        userId: o.userId,
+        username: o.username,
+        customerEmail: o.customerEmail || '',
+        customerAddress: o.customerAddress || (dashboardState.currentUser?.address || '101 Residency Road, Central District, Bengaluru 560025'),
+        item: o.item || prod.name,
+        sku: o.sku || prod.sku,
+        category: o.category || prod.category || 'General',
+        imageUrl: o.imageUrl || prod.imageUrl,
+        amount: o.amount || o.priceInr || prod.priceInr,
+        originalPrice: o.originalPrice || o.amount || prod.priceInr,
+        discount: o.discount || 0,
+        quantity: o.quantity || 1,
+        status: o.status || 'Paid',
+        channel: o.channel || 'In-App Conversational Checkout',
+        channelType: o.channelType || 'chat',
+        date: formattedDate,
+        rawDate: orderDateObj.getTime(),
+        trackingNumber: o.trackingNumber || `BLUEDART-${Math.floor(100000 + Math.random() * 900000)}`,
+        estDelivery: o.estDelivery || 'Estimated Delivery in 2 Business Days'
+      };
+    });
 
     // Synthesize real captured orders from actual audit traces
     const synthesizedOrders = traces
@@ -778,13 +822,13 @@ async function refreshOverviewStats() {
     ];
 
     const orderMap = new Map();
-    [...mockBaselineOrders, ...synthesizedOrders].forEach(o => {
+    [...backendOrders, ...synthesizedOrders, ...mockBaselineOrders].forEach(o => {
       if (!orderMap.has(o.id)) {
         orderMap.set(o.id, o);
       }
     });
 
-    dashboardState.orders = Array.from(orderMap.values());
+    dashboardState.orders = Array.from(orderMap.values()).sort((a, b) => (b.rawDate || 0) - (a.rawDate || 0));
 
     // Update customer order counts and LTV dynamically based on user-scoped orders
     dashboardState.customers.forEach(cust => {
@@ -1327,6 +1371,7 @@ async function buyStorefrontProduct(sku) {
           });
 
           const vData = await verifyRes.json();
+          await refreshOverviewStats();
           if (verifyRes.ok && vData.status === 'success') {
             alert(`Payment Successful! Order ID: ${response.razorpay_order_id}\nTracking number generated.`);
             switchAdminTab('tab-orders');
@@ -1335,6 +1380,7 @@ async function buyStorefrontProduct(sku) {
             switchAdminTab('tab-orders');
           }
         } catch (err) {
+          await refreshOverviewStats();
           switchAdminTab('tab-orders');
         }
       },
@@ -1381,21 +1427,17 @@ async function handleUpdateProfile(e) {
     });
 
     const data = await res.json();
-    if (res.ok && data.status === 'success') {
-      if (dashboardState.currentUser) {
-        dashboardState.currentUser.name = name;
-        dashboardState.currentUser.phone = phone;
-        dashboardState.currentUser.address = address;
-        dashboardState.currentUser.city = city;
-        localStorage.setItem('shopstore_user', JSON.stringify(dashboardState.currentUser));
-      }
-      updateLoggedInUserUI();
-      alert('Profile & delivery details updated successfully!');
-    } else {
-      alert(data.message || 'Profile saved.');
+    if (!res.ok || data.status !== 'success') {
+      alert(data.message || 'Failed to update profile');
+      return;
     }
+
+    // Success
+    setAuthSession(token, data.user);
+    updateLoggedInUserUI();
+    alert('Profile updated successfully!');
   } catch (err) {
-    alert('Saved locally: ' + err.message);
+    alert('Error updating profile: ' + err.message);
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -1450,18 +1492,36 @@ function renderAmazonOrderCards() {
   // By default, filter strictly to the currently logged in user
   if (dashboardState.activeCustomerFilter === 'self' && dashboardState.currentUser) {
     const u = dashboardState.currentUser;
-    filtered = filtered.filter(o => 
-      o.customerId === u.id || 
-      o.customer.toLowerCase() === u.name.toLowerCase() ||
-      o.customer.toLowerCase() === u.username.toLowerCase()
-    );
+    const uid = (u.userId || u.id || '').toLowerCase();
+    const uname = (u.username || '').toLowerCase();
+    const name = (u.name || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+
+    filtered = filtered.filter(o => {
+      const oCustId = (o.customerId || o.userId || '').toLowerCase();
+      const oUser = (o.username || '').toLowerCase();
+      const oCust = (o.customer || o.customerName || '').toLowerCase();
+      const oEmail = (o.customerEmail || '').toLowerCase();
+
+      return (
+        (uid && (oCustId === uid || oCustId === `cust_${uid}`)) ||
+        (uname && (oUser === uname || oCustId === uname || oCustId === `cust_${uname}` || oCust === uname)) ||
+        (name && (oCust === name || oCust.includes(name) || name.includes(oCust))) ||
+        (email && oEmail && oEmail === email) ||
+        oCustId === 'cust_active' ||
+        oCust === 'verified customer' ||
+        oCust === 'shopper'
+      );
+    });
   } else if (dashboardState.activeCustomerFilter && dashboardState.activeCustomerFilter !== 'all' && dashboardState.activeCustomerFilter !== 'self') {
     const selectedCust = dashboardState.customers.find(c => c.id === dashboardState.activeCustomerFilter);
     if (selectedCust) {
       filtered = filtered.filter(o => 
         o.customerId === selectedCust.id || 
-        o.customer.toLowerCase() === selectedCust.name.toLowerCase() ||
-        o.customer.toLowerCase() === selectedCust.username.toLowerCase()
+        o.customerId === `cust_${selectedCust.id}` ||
+        (o.customer && o.customer.toLowerCase() === selectedCust.name.toLowerCase()) ||
+        (o.customer && o.customer.toLowerCase() === selectedCust.username.toLowerCase()) ||
+        (o.username && o.username.toLowerCase() === selectedCust.username.toLowerCase())
       );
     }
   }
