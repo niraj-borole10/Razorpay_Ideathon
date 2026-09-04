@@ -517,14 +517,8 @@
 
             <div class="flex items-center space-x-2 py-1">
               <span class="text-neutral-500 font-medium">Customer:</span>
-              <select id="orders-customer-filter-select" onchange="setOrderCustomerFilter(this.value)" class="fintech-input h-7 text-xs">
-                <option value="all">All Customers</option>
-                <option value="cust_01">Rahul Sharma</option>
-                <option value="cust_02">Sneha Kapur</option>
-                <option value="cust_03">Vikram Mehta</option>
-                <option value="cust_04">Aditi Roy</option>
-                <option value="cust_05">Karan Joshi</option>
-                <option value="cust_m2m">Autonomous AI Buyer</option>
+              <select id="orders-customer-filter-select" onchange="setOrderCustomerFilter(this.value)" class="fintech-input h-7 text-xs font-medium bg-white">
+                <option value="self" id="orders-customer-option-self">Verified Customer</option>
               </select>
             </div>
           </div>

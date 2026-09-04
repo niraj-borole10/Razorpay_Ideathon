@@ -350,6 +350,13 @@ function updateLoggedInUserUI() {
   if (pDispName) pDispName.textContent = user.name || user.username;
   if (pDispMeta) pDispMeta.textContent = `@${user.username} • ${user.email}`;
   if (pAvatar) pAvatar.textContent = (user.name || user.username).charAt(0).toUpperCase();
+
+  // Update Customer dropdown in Orders tab to show ONLY current user
+  const ordersCustSelect = document.getElementById('orders-customer-filter-select');
+  if (ordersCustSelect) {
+    ordersCustSelect.innerHTML = `<option value="self">${displayName}</option>`;
+    ordersCustSelect.value = 'self';
+  }
 }
 
 function switchAdminTab(tabId) {
