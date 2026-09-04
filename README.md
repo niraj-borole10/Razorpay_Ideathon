@@ -293,6 +293,20 @@ node -e "/* test suite */"
 
 ---
 
+## 👨‍💻 Built By
+
+### **Niraj Borole**
+*Pre-final year undergraduate at IIT Kharagpur*
+
+Passionate about building resilient, full-stack applications, intelligent agentic workflows, and seamless fintech payment integrations. Engineered and developed **ShopStore — Razorpay Agentic Commerce** to bridge traditional e-commerce with next-generation autonomous AI purchasing and zero-redirect payment flows.
+
+- **LinkedIn:** [Niraj Borole | LinkedIn](https://www.linkedin.com/in/niraj-borole-a590b6313/)
+- **GitHub:** [@niraj-borole10](https://github.com/niraj-borole10)
+- **Email:** [nirajborole0@gmail.com](mailto:nirajborole0@gmail.com)
+- **Repository:** [Razorpay_Ideathon](https://github.com/niraj-borole10/Razorpay_Ideathon)
+
+---
+
 ## 📄 License
 MIT License. Built for **Track 01: AI Growth & Agentic Commerce**.
 
